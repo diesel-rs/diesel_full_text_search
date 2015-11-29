@@ -1,8 +1,8 @@
 #[macro_use]
-extern crate yaqb;
+extern crate diesel;
 
 mod types {
-    use yaqb::types::NativeSqlType;
+    use diesel::types::NativeSqlType;
 
     #[derive(Clone, Copy)] pub struct TsQuery;
     #[derive(Clone, Copy)] pub struct TsVector;
@@ -30,7 +30,7 @@ mod types {
 
 mod functions {
     use types::*;
-    use yaqb::types::*;
+    use diesel::types::*;
 
     sql_function!(length, length_t, (x: TsVector) -> Integer);
     sql_function!(numnode, numnode_t, (x: TsQuery) -> Integer);
@@ -46,7 +46,7 @@ mod functions {
 
 mod dsl {
     use types::*;
-    use yaqb::expression::{Expression, AsExpression};
+    use diesel::expression::{Expression, AsExpression};
 
     mod predicates {
         use types::*;
