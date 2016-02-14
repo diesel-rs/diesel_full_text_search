@@ -2,28 +2,27 @@
 extern crate diesel;
 
 mod types {
-    use diesel::types::NativeSqlType;
+    use diesel::types::HasSqlType;
+    use diesel::pg::{Pg, PgTypeMetadata};
 
     #[derive(Clone, Copy)] pub struct TsQuery;
     #[derive(Clone, Copy)] pub struct TsVector;
 
-    impl NativeSqlType for TsQuery {
-        fn oid(&self) -> u32 {
-            3615
-        }
-
-        fn new() -> Self {
-            TsQuery
+    impl HasSqlType<TsQuery> for Pg {
+        fn metadata() -> PgTypeMetadata {
+            PgTypeMetadata {
+                oid: 3615,
+                array_oid: 3645,
+            }
         }
     }
 
-    impl NativeSqlType for TsVector {
-        fn oid(&self) -> u32 {
-            3614
-        }
-
-        fn new() -> Self {
-            TsVector
+    impl HasSqlType<TsVector> for Pg {
+        fn metadata() -> PgTypeMetadata {
+            PgTypeMetadata {
+                oid: 3614,
+                array_oid: 3643,
+            }
         }
     }
 }
@@ -50,6 +49,7 @@ mod dsl {
 
     mod predicates {
         use types::*;
+        use diesel::query_builder::QueryBuilder;
 
         infix_predicate!(Matches, " @@ ");
         infix_predicate!(Concat, " || ", TsVector);
