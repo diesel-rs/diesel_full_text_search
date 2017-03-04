@@ -1,6 +1,6 @@
 [package]
 name = "diesel_full_text_search"
-version = "0.11.0"
+version = "0.11.1"
 authors = ["Sean Griffin <sean@seantheprogrammer.com>"]
 description = "Adds support for PostgreSQL full text search to Diesel"
 license = "MIT"

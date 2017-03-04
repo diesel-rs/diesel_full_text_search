@@ -2,7 +2,7 @@
 extern crate diesel;
 
 mod types {
-    use diesel::types::HasSqlType;
+    use diesel::types::{HasSqlType, NotNull};
     use diesel::pg::{Pg, PgTypeMetadata};
 
     #[derive(Clone, Copy)] pub struct TsQuery;
@@ -25,6 +25,9 @@ mod types {
             }
         }
     }
+
+    impl NotNull for TsVector {}
+    impl NotNull for TsQuery {}
 }
 
 mod functions {
