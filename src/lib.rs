@@ -52,7 +52,6 @@ mod dsl {
 
     mod predicates {
         use types::*;
-        use diesel::query_builder::QueryBuilder;
 
         infix_predicate!(Matches, " @@ ");
         infix_predicate!(Concat, " || ", TsVector);
