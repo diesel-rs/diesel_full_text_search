@@ -2,6 +2,7 @@
 extern crate diesel;
 
 mod types {
+    use diesel::backend::Debug;
     use diesel::types::{HasSqlType, NotNull};
     use diesel::pg::{Pg, PgTypeMetadata};
 
@@ -17,12 +18,24 @@ mod types {
         }
     }
 
+    impl HasSqlType<TsQuery> for Debug {
+        fn metadata() -> () {
+            ()
+        }
+    }
+
     impl HasSqlType<TsVector> for Pg {
         fn metadata() -> PgTypeMetadata {
             PgTypeMetadata {
                 oid: 3614,
                 array_oid: 3643,
             }
+        }
+    }
+
+    impl HasSqlType<TsVector> for Debug {
+        fn metadata() -> () {
+            ()
         }
     }
 
@@ -52,13 +65,14 @@ mod dsl {
 
     mod predicates {
         use types::*;
+        use diesel::pg::Pg;
 
-        infix_predicate!(Matches, " @@ ");
-        infix_predicate!(Concat, " || ", TsVector);
-        infix_predicate!(And, " && ", TsQuery);
-        infix_predicate!(Or, " || ", TsQuery);
-        infix_predicate!(Contains, " @> ");
-        infix_predicate!(ContainedBy, " @> ");
+        diesel_infix_operator!(Matches, " @@ ", backend: Pg);
+        diesel_infix_operator!(Concat, " || ", TsVector, backend: Pg);
+        diesel_infix_operator!(And, " && ", TsQuery, backend: Pg);
+        diesel_infix_operator!(Or, " || ", TsQuery, backend: Pg);
+        diesel_infix_operator!(Contains, " @> ", backend: Pg);
+        diesel_infix_operator!(ContainedBy, " @> ", backend: Pg);
     }
 
     use self::predicates::*;
