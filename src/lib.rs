@@ -4,13 +4,13 @@ extern crate diesel;
 mod types {
     use diesel::backend::Debug;
     use diesel::types::{HasSqlType, NotNull};
-    use diesel::pg::{Pg, PgTypeMetadata};
+    use diesel::pg::{Pg, PgTypeMetadata, PgMetadataLookup};
 
     #[derive(Clone, Copy)] pub struct TsQuery;
     #[derive(Clone, Copy)] pub struct TsVector;
 
     impl HasSqlType<TsQuery> for Pg {
-        fn metadata() -> PgTypeMetadata {
+        fn metadata(_: &PgMetadataLookup) -> PgTypeMetadata {
             PgTypeMetadata {
                 oid: 3615,
                 array_oid: 3645,
@@ -19,13 +19,13 @@ mod types {
     }
 
     impl HasSqlType<TsQuery> for Debug {
-        fn metadata() -> () {
+        fn metadata(_: &()) -> () {
             ()
         }
     }
 
     impl HasSqlType<TsVector> for Pg {
-        fn metadata() -> PgTypeMetadata {
+        fn metadata(_: &PgMetadataLookup) -> PgTypeMetadata {
             PgTypeMetadata {
                 oid: 3614,
                 array_oid: 3643,
@@ -34,7 +34,7 @@ mod types {
     }
 
     impl HasSqlType<TsVector> for Debug {
-        fn metadata() -> () {
+        fn metadata(_: &()) -> () {
             ()
         }
     }
