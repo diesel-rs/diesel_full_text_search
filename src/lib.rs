@@ -59,7 +59,7 @@ mod dsl {
         diesel_infix_operator!(And, " && ", TsQuery, backend: Pg);
         diesel_infix_operator!(Or, " || ", TsQuery, backend: Pg);
         diesel_infix_operator!(Contains, " @> ", backend: Pg);
-        diesel_infix_operator!(ContainedBy, " @> ", backend: Pg);
+        diesel_infix_operator!(ContainedBy, " <@ ", backend: Pg);
     }
 
     use self::predicates::*;
