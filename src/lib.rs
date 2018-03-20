@@ -44,6 +44,7 @@ mod functions {
     sql_function!(ts_headline, ts_headline_t, (x: Text, y: TsQuery) -> Text);
     sql_function!(ts_rank, ts_rank_t, (x: TsVector, y: TsQuery) -> Float);
     sql_function!(ts_rank_cd, ts_rank_cd_t, (x: TsVector, y: TsQuery) -> Float);
+    sql_function!(setweight, setweight_t, (x: TsVector, y: Text) -> TsVector);
 }
 
 mod dsl {
