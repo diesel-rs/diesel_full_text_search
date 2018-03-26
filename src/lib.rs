@@ -33,6 +33,7 @@ mod types {
 mod functions {
     use types::*;
     use diesel::types::*;
+    use diesel::pg::types::sql_types::Array;
 
     sql_function!(length, length_t, (x: TsVector) -> Integer);
     sql_function!(numnode, numnode_t, (x: TsQuery) -> Integer);
@@ -44,6 +45,15 @@ mod functions {
     sql_function!(ts_headline, ts_headline_t, (x: Text, y: TsQuery) -> Text);
     sql_function!(ts_rank, ts_rank_t, (x: TsVector, y: TsQuery) -> Float);
     sql_function!(ts_rank_cd, ts_rank_cd_t, (x: TsVector, y: TsQuery) -> Float);
+    sql_function!(setweight, setweight_t, (x: TsVector, y: Text) -> TsVector);
+
+    variant_sql_function!(ts_rank_custom_weights, ts_rank_cw, ts_rank, (w: Array, x: TsVector, y: Text) -> Float);
+    variant_sql_function!(ts_rank_normalized, ts_rank_norm, ts_rank, (x: TsVector, y: Text, z: Integer) -> Float);
+    variant_sql_function!(ts_rank_custom_weights_normalized, ts_rank_cw_norm, ts_rank, (w: Array, x: TsVector, y: Text, z: Integer) -> Float);
+
+    variant_sql_function!(ts_rank_cd_custom_weights, ts_rank_cd_cw, ts_rank, (w: Array, x: TsVector, y: Text) -> Float);
+    variant_sql_function!(ts_rank_cd_normalized, ts_rank_cd_norm, ts_rank, (x: TsVector, y: Text, z: Integer) -> Float);
+    variant_sql_function!(ts_rank_cd_custom_weights_normalized, ts_rank_cd_cw_norm, ts_rank, (w: Array, x: TsVector, y: Text, z: Integer) -> Float);
 }
 
 mod dsl {
