@@ -6,10 +6,12 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
-### Fixed
+### [1.0.1] - 2018-04-11
 
 * `TsVector::concat` now properly wraps its values in parenthesis
 
 ## 1.0.0 - 2018-01-02
 
 * Initial release
+
+[1.0.1]: https://github.com/diesel-rs/diesel/compare/v1.0.0...v1.0.1
