@@ -2,6 +2,7 @@
 extern crate diesel;
 
 mod types {
+    #[allow(deprecated)]
     use diesel::types::{HasSqlType, NotNull};
     use diesel::pg::{Pg, PgTypeMetadata, PgMetadataLookup};
 
@@ -30,6 +31,7 @@ mod types {
     impl NotNull for TsQuery {}
 }
 
+#[allow(deprecated)]
 mod functions {
     use types::*;
     use diesel::types::*;
@@ -49,6 +51,7 @@ mod functions {
 mod dsl {
     use types::*;
     use diesel::expression::{Expression, AsExpression};
+    use diesel::expression::grouped::Grouped;
 
     mod predicates {
         use types::*;
@@ -64,13 +67,15 @@ mod dsl {
 
     use self::predicates::*;
 
+    pub type Concat<T, U> = Grouped<predicates::Concat<T, U>>;
+
     pub trait TsVectorExtensions: Expression<SqlType=TsVector> + Sized {
         fn matches<T: AsExpression<TsQuery>>(self, other: T) -> Matches<Self, T::Expression> {
             Matches::new(self, other.as_expression())
         }
 
         fn concat<T: AsExpression<TsVector>>(self, other: T) -> Concat<Self, T::Expression> {
-            Concat::new(self, other.as_expression())
+            Grouped(predicates::Concat::new(self, other.as_expression()))
         }
     }
 
