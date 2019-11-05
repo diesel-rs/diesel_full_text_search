@@ -1,5 +1,5 @@
-#[macro_use]
-extern crate diesel;
+#![feature(custom_attribute)]
+#[macro_use] extern crate diesel;
 
 mod types {
     #[allow(deprecated)]
@@ -42,7 +42,11 @@ mod functions {
     sql_function!(fn querytree(x: TsQuery) -> Text);
     sql_function!(fn strip(x: TsVector) -> TsVector);
     sql_function!(fn to_tsquery(x: Text) -> TsQuery);
+    #[sql_name = "to_tsquery"]
+    sql_function!(fn to_tsquery_with_language_config(x: Text, y: Text) -> TsQuery);
     sql_function!(fn to_tsvector(x: Text) -> TsVector);
+    #[sql_name = "to_tsvector"]
+    sql_function!(fn to_tsvector_with_language_config(x: Text, y: Text) -> TsVector);
     sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
     sql_function!(fn ts_rank_cd(x: TsVector, y: TsQuery) -> Float);
