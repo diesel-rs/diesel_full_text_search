@@ -4,10 +4,18 @@
 mod types {
     #[allow(deprecated)]
     use diesel::sql_types::{HasSqlType, NotNull};
+    use diesel::SqlType;
     use diesel::pg::{Pg, PgTypeMetadata, PgMetadataLookup};
 
-    #[derive(Clone, Copy)] pub struct TsQuery;
-    #[derive(Clone, Copy)] pub struct TsVector;
+    #[derive(Clone, Copy)]
+    pub struct TsQuery;
+
+    #[derive(Clone, Copy)]
+    pub struct TsVector;
+
+    #[derive(SqlType)]
+    #[postgres(type_name = "regconfig")]
+    pub struct Regconfig;
 
     impl HasSqlType<TsQuery> for Pg {
         fn metadata(_: &PgMetadataLookup) -> PgTypeMetadata {
@@ -43,10 +51,10 @@ mod functions {
     sql_function!(fn strip(x: TsVector) -> TsVector);
     sql_function!(fn to_tsquery(x: Text) -> TsQuery);
     #[sql_name = "to_tsquery"]
-    sql_function!(fn to_tsquery_with_language_config(x: Text, y: Text) -> TsQuery);
+    sql_function!(fn to_tsquery_with_search_config(config: Regconfig, querytext: Text) -> TsQuery);
     sql_function!(fn to_tsvector(x: Text) -> TsVector);
     #[sql_name = "to_tsvector"]
-    sql_function!(fn to_tsvector_with_language_config(x: Text, y: Text) -> TsVector);
+    sql_function!(fn to_tsvector_with_search_config(config: Regconfig, document_content: Text) -> TsVector);
     sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
     sql_function!(fn ts_rank_cd(x: TsVector, y: TsQuery) -> Float);
