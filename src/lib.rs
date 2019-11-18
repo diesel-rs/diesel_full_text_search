@@ -3,7 +3,7 @@ extern crate diesel;
 
 mod types {
     #[allow(deprecated)]
-    use diesel::types::{HasSqlType, NotNull};
+    use diesel::sql_types::{HasSqlType, NotNull};
     use diesel::pg::{Pg, PgTypeMetadata, PgMetadataLookup};
 
     #[derive(Clone, Copy)] pub struct TsQuery;
@@ -34,7 +34,7 @@ mod types {
 #[allow(deprecated)]
 mod functions {
     use types::*;
-    use diesel::types::*;
+    use diesel::sql_types::*;
 
     sql_function!(fn length(x: TsVector) -> Integer);
     sql_function!(fn numnode(x: TsQuery) -> Integer);
