@@ -3,7 +3,7 @@ extern crate diesel;
 
 mod types {
     #[allow(deprecated)]
-    use diesel::types::{HasSqlType, NotNull};
+    use diesel::sql_types::{HasSqlType, NotNull};
     use diesel::pg::{Pg, PgTypeMetadata, PgMetadataLookup};
 
     #[derive(Clone, Copy)] pub struct TsQuery;
@@ -34,18 +34,18 @@ mod types {
 #[allow(deprecated)]
 mod functions {
     use types::*;
-    use diesel::types::*;
+    use diesel::sql_types::*;
 
-    sql_function!(length, length_t, (x: TsVector) -> Integer);
-    sql_function!(numnode, numnode_t, (x: TsQuery) -> Integer);
-    sql_function!(plainto_tsquery, plain_to_tsquery_t, (x: Text) -> TsQuery);
-    sql_function!(querytree, querytree_t, (x: TsQuery) -> Text);
-    sql_function!(strip, strip_t, (x: TsVector) -> TsVector);
-    sql_function!(to_tsquery, to_tsquery_t, (x: Text) -> TsQuery);
-    sql_function!(to_tsvector, to_tsvector_t, (x: Text) -> TsVector);
-    sql_function!(ts_headline, ts_headline_t, (x: Text, y: TsQuery) -> Text);
-    sql_function!(ts_rank, ts_rank_t, (x: TsVector, y: TsQuery) -> Float);
-    sql_function!(ts_rank_cd, ts_rank_cd_t, (x: TsVector, y: TsQuery) -> Float);
+    sql_function!(fn length(x: TsVector) -> Integer);
+    sql_function!(fn numnode(x: TsQuery) -> Integer);
+    sql_function!(fn plainto_tsquery(x: Text) -> TsQuery);
+    sql_function!(fn querytree(x: TsQuery) -> Text);
+    sql_function!(fn strip(x: TsVector) -> TsVector);
+    sql_function!(fn to_tsquery(x: Text) -> TsQuery);
+    sql_function!(fn to_tsvector(x: Text) -> TsVector);
+    sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
+    sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
+    sql_function!(fn ts_rank_cd(x: TsVector, y: TsQuery) -> Float);
 }
 
 mod dsl {
