@@ -46,6 +46,8 @@ mod functions {
     sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
     sql_function!(fn ts_rank_cd(x: TsVector, y: TsQuery) -> Float);
+    sql_function!(fn phraseto_tsquery(x: Text) -> TsQuery);
+    sql_function!(fn websearch_to_tsquery(x: Text) -> TsQuery);
 }
 
 mod dsl {
