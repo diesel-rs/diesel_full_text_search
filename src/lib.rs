@@ -2,40 +2,17 @@
 
 mod types {
     #[allow(deprecated)]
-    use diesel::sql_types::{HasSqlType, NotNull};
     use diesel::SqlType;
-    use diesel::pg::{Pg, PgTypeMetadata, PgMetadataLookup};
 
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, SqlType)]
     pub struct TsQuery;
 
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, SqlType)]
     pub struct TsVector;
 
     #[derive(SqlType)]
     #[postgres(type_name = "regconfig")]
     pub struct Regconfig;
-
-    impl HasSqlType<TsQuery> for Pg {
-        fn metadata(_: &PgMetadataLookup) -> PgTypeMetadata {
-            PgTypeMetadata {
-                oid: 3615,
-                array_oid: 3645,
-            }
-        }
-    }
-
-    impl HasSqlType<TsVector> for Pg {
-        fn metadata(_: &PgMetadataLookup) -> PgTypeMetadata {
-            PgTypeMetadata {
-                oid: 3614,
-                array_oid: 3643,
-            }
-        }
-    }
-
-    impl NotNull for TsVector {}
-    impl NotNull for TsQuery {}
 }
 
 #[allow(deprecated)]
