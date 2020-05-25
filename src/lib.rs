@@ -5,9 +5,11 @@ mod types {
     use diesel::SqlType;
 
     #[derive(Clone, Copy, SqlType)]
+    #[postgres(oid = "3615", array_oid = "3645")]
     pub struct TsQuery;
 
     #[derive(Clone, Copy, SqlType)]
+    #[postgres(oid = "3614", array_oid = "3643")]
     pub struct TsVector;
 
     #[derive(SqlType)]
