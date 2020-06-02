@@ -1,34 +1,20 @@
-#[macro_use]
-extern crate diesel;
+#[macro_use] extern crate diesel;
 
 mod types {
     #[allow(deprecated)]
-    use diesel::sql_types::{HasSqlType, NotNull};
-    use diesel::pg::{Pg, PgTypeMetadata, PgMetadataLookup};
+    use diesel::SqlType;
 
-    #[derive(Clone, Copy)] pub struct TsQuery;
-    #[derive(Clone, Copy)] pub struct TsVector;
+    #[derive(Clone, Copy, SqlType)]
+    #[postgres(oid = "3615", array_oid = "3645")]
+    pub struct TsQuery;
 
-    impl HasSqlType<TsQuery> for Pg {
-        fn metadata(_: &PgMetadataLookup) -> PgTypeMetadata {
-            PgTypeMetadata {
-                oid: 3615,
-                array_oid: 3645,
-            }
-        }
-    }
+    #[derive(Clone, Copy, SqlType)]
+    #[postgres(oid = "3614", array_oid = "3643")]
+    pub struct TsVector;
 
-    impl HasSqlType<TsVector> for Pg {
-        fn metadata(_: &PgMetadataLookup) -> PgTypeMetadata {
-            PgTypeMetadata {
-                oid: 3614,
-                array_oid: 3643,
-            }
-        }
-    }
-
-    impl NotNull for TsVector {}
-    impl NotNull for TsQuery {}
+    #[derive(SqlType)]
+    #[postgres(type_name = "regconfig")]
+    pub struct Regconfig;
 }
 
 #[allow(deprecated)]
@@ -42,7 +28,15 @@ mod functions {
     sql_function!(fn querytree(x: TsQuery) -> Text);
     sql_function!(fn strip(x: TsVector) -> TsVector);
     sql_function!(fn to_tsquery(x: Text) -> TsQuery);
+    sql_function! {
+        #[sql_name = "to_tsquery"]
+        fn to_tsquery_with_search_config(config: Regconfig, querytext: Text) -> TsQuery;
+    }
     sql_function!(fn to_tsvector(x: Text) -> TsVector);
+    sql_function! {
+        #[sql_name = "to_tsvector"]
+        fn to_tsvector_with_search_config(config: Regconfig, document_content: Text) -> TsVector;
+    }
     sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
     sql_function!(fn ts_rank_cd(x: TsVector, y: TsQuery) -> Float);
