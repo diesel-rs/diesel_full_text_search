@@ -11,6 +11,7 @@ mod types {
     #[derive(Clone, Copy, SqlType)]
     #[postgres(oid = "3614", array_oid = "3643")]
     pub struct TsVector;
+    pub type Tsvector = TsVector;
 
     #[derive(SqlType)]
     #[postgres(type_name = "regconfig")]
