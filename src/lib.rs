@@ -11,6 +11,7 @@ mod types {
     #[derive(Clone, Copy, SqlType)]
     #[postgres(oid = "3614", array_oid = "3643")]
     pub struct TsVector;
+    pub type Tsvector = TsVector;
 
     #[derive(SqlType)]
     #[postgres(type_name = "regconfig")]
@@ -40,6 +41,10 @@ mod functions {
     sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
     sql_function!(fn ts_rank_cd(x: TsVector, y: TsQuery) -> Float);
+    sql_function! {
+        #[sql_name = "ts_rank_cd"]
+        fn ts_rank_cd_weighted(w: Array<Float>, x: TsVector, y: TsQuery) -> Float;
+    }
     sql_function!(fn phraseto_tsquery(x: Text) -> TsQuery);
     sql_function!(fn websearch_to_tsquery(x: Text) -> TsQuery);
 }
