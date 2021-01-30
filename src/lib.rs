@@ -64,6 +64,7 @@ mod dsl {
         diesel_infix_operator!(Or, " || ", TsQuery, backend: Pg);
         diesel_infix_operator!(Contains, " @> ", backend: Pg);
         diesel_infix_operator!(ContainedBy, " <@ ", backend: Pg);
+        diesel_prefix_operator!(Negate, " !! ", TsQuery, backend: Pg);
     }
 
     use self::predicates::*;
@@ -106,6 +107,10 @@ mod dsl {
     }
 
     impl<T: Expression<SqlType=TsQuery>> TsQueryExtensions for T {
+    }
+
+    pub fn negate<T: AsExpression<TsQuery>>(expr: T) -> Negate<Grouped<T::Expression>> {
+        Negate::new(Grouped(expr.as_expression()))
     }
 }
 
