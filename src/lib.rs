@@ -2,14 +2,6 @@
 extern crate diesel;
 
 mod types {
-    use std::io::Write;
-
-    use diesel::backend::Backend;
-    use diesel::deserialize::{self, FromSql};
-    use diesel::serialize::{self, Output};
-    use diesel::sql_types::Integer;
-    use diesel::types::ToSql;
-
     #[allow(deprecated)]
     use diesel::SqlType;
 
@@ -21,6 +13,22 @@ mod types {
     #[postgres(oid = "3614", array_oid = "3643")]
     pub struct TsVector;
     pub type Tsvector = TsVector;
+
+    #[derive(SqlType)]
+    #[postgres(type_name = "regconfig")]
+    pub struct Regconfig;
+}
+
+pub mod configuration {
+    use crate::Regconfig;
+
+    use std::io::Write;
+
+    use diesel::backend::Backend;
+    use diesel::deserialize::{self, FromSql};
+    use diesel::serialize::{self, Output};
+    use diesel::sql_types::Integer;
+    use diesel::types::ToSql;
 
     pub const CONFIGURATION_SIMPLE: u32 = 3748;
     pub const CONFIGURATION_DANISH: u32 = 12824;
@@ -39,13 +47,9 @@ mod types {
     pub const CONFIGURATION_SWEDISH: u32 = 12850;
     pub const CONFIGURATION_TURKISH: u32 = 12852;
 
-    #[derive(SqlType)]
-    #[postgres(type_name = "regconfig")]
-    pub struct Regconfig;
-
     #[derive(Debug, PartialEq, AsExpression)]
     #[sql_type = "Regconfig"]
-    pub struct TsConfiguration(u32);
+    pub struct TsConfiguration(pub u32);
 
     impl<DB> FromSql<Regconfig, DB> for TsConfiguration
     where
