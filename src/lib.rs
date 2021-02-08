@@ -1,4 +1,5 @@
-#[macro_use] extern crate diesel;
+#[macro_use]
+extern crate diesel;
 
 mod types {
     #[allow(deprecated)]
@@ -20,8 +21,8 @@ mod types {
 
 #[allow(deprecated)]
 mod functions {
-    use types::*;
     use diesel::sql_types::*;
+    use types::*;
 
     sql_function!(fn length(x: TsVector) -> Integer);
     sql_function!(fn numnode(x: TsQuery) -> Integer);
@@ -34,9 +35,14 @@ mod functions {
         fn to_tsquery_with_search_config(config: Regconfig, querytext: Text) -> TsQuery;
     }
     sql_function!(fn to_tsvector(x: Text) -> TsVector);
+    sql_function!(fn nullableto_tsvector(x: Nullable<Text>) -> TsVector);
     sql_function! {
         #[sql_name = "to_tsvector"]
         fn to_tsvector_with_search_config(config: Regconfig, document_content: Text) -> TsVector;
+    }
+    sql_function! {
+        #[sql_name = "to_tsvector"]
+        fn nullableto_tsvector_with_search_config(config: Regconfig, document_content: Nullable<Text>) -> TsVector;
     }
     sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
@@ -50,13 +56,13 @@ mod functions {
 }
 
 mod dsl {
-    use types::*;
-    use diesel::expression::{Expression, AsExpression};
     use diesel::expression::grouped::Grouped;
+    use diesel::expression::{AsExpression, Expression};
+    use types::*;
 
     mod predicates {
-        use types::*;
         use diesel::pg::Pg;
+        use types::*;
 
         diesel_infix_operator!(Matches, " @@ ", backend: Pg);
         diesel_infix_operator!(Concat, " || ", TsVector, backend: Pg);
@@ -70,7 +76,7 @@ mod dsl {
 
     pub type Concat<T, U> = Grouped<predicates::Concat<T, U>>;
 
-    pub trait TsVectorExtensions: Expression<SqlType=TsVector> + Sized {
+    pub trait TsVectorExtensions: Expression<SqlType = TsVector> + Sized {
         fn matches<T: AsExpression<TsQuery>>(self, other: T) -> Matches<Self, T::Expression> {
             Matches::new(self, other.as_expression())
         }
@@ -80,7 +86,7 @@ mod dsl {
         }
     }
 
-    pub trait TsQueryExtensions: Expression<SqlType=TsQuery> + Sized {
+    pub trait TsQueryExtensions: Expression<SqlType = TsQuery> + Sized {
         fn matches<T: AsExpression<TsVector>>(self, other: T) -> Matches<Self, T::Expression> {
             Matches::new(self, other.as_expression())
         }
@@ -97,18 +103,19 @@ mod dsl {
             Contains::new(self, other.as_expression())
         }
 
-        fn contained_by<T: AsExpression<TsQuery>>(self, other: T) -> ContainedBy<Self, T::Expression> {
+        fn contained_by<T: AsExpression<TsQuery>>(
+            self,
+            other: T,
+        ) -> ContainedBy<Self, T::Expression> {
             ContainedBy::new(self, other.as_expression())
         }
     }
 
-    impl<T: Expression<SqlType=TsVector>> TsVectorExtensions for T {
-    }
+    impl<T: Expression<SqlType = TsVector>> TsVectorExtensions for T {}
 
-    impl<T: Expression<SqlType=TsQuery>> TsQueryExtensions for T {
-    }
+    impl<T: Expression<SqlType = TsQuery>> TsQueryExtensions for T {}
 }
 
-pub use self::types::*;
-pub use self::functions::*;
 pub use self::dsl::*;
+pub use self::functions::*;
+pub use self::types::*;
