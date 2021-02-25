@@ -2,6 +2,8 @@
 extern crate diesel;
 
 mod types {
+    use diesel::sql_types::*;
+
     #[allow(deprecated)]
     use diesel::SqlType;
 
@@ -13,6 +15,11 @@ mod types {
     #[postgres(oid = "3614", array_oid = "3643")]
     pub struct TsVector;
     pub type Tsvector = TsVector;
+
+    pub trait TextOrNullableText {}
+
+    impl TextOrNullableText for Text {}
+    impl TextOrNullableText for Nullable<Text> {}
 
     #[derive(SqlType)]
     #[postgres(type_name = "regconfig")]
@@ -30,26 +37,28 @@ pub mod configuration {
     use diesel::sql_types::Integer;
     use diesel::types::ToSql;
 
-    pub const CONFIGURATION_SIMPLE: u32 = 3748;
-    pub const CONFIGURATION_DANISH: u32 = 12824;
-    pub const CONFIGURATION_DUTCH: u32 = 12826;
-    pub const CONFIGURATION_ENGLISH: u32 = 12828;
-    pub const CONFIGURATION_FINNISH: u32 = 12830;
-    pub const CONFIGURATION_FRENCH: u32 = 12832;
-    pub const CONFIGURATION_GERMAN: u32 = 12834;
-    pub const CONFIGURATION_HUNGARIAN: u32 = 12836;
-    pub const CONFIGURATION_ITALIAN: u32 = 12838;
-    pub const CONFIGURATION_NORWEGIAN: u32 = 12840;
-    pub const CONFIGURATION_PORTUGUESE: u32 = 12842;
-    pub const CONFIGURATION_ROMANIAN: u32 = 12844;
-    pub const CONFIGURATION_RUSSIAN: u32 = 12846;
-    pub const CONFIGURATION_SPANISH: u32 = 12848;
-    pub const CONFIGURATION_SWEDISH: u32 = 12850;
-    pub const CONFIGURATION_TURKISH: u32 = 12852;
-
     #[derive(Debug, PartialEq, AsExpression)]
     #[sql_type = "Regconfig"]
     pub struct TsConfiguration(pub u32);
+
+    impl TsConfiguration {
+        pub const SIMPLE: Self = Self(3748);
+        pub const DANISH: Self = Self(12824);
+        pub const DUTCH: Self = Self(12826);
+        pub const ENGLISH: Self = Self(12828);
+        pub const FINNISH: Self = Self(12830);
+        pub const FRENCH: Self = Self(12832);
+        pub const GERMAN: Self = Self(12834);
+        pub const HUNGARIAN: Self = Self(12836);
+        pub const ITALIAN: Self = Self(12838);
+        pub const NORWEGIAN: Self = Self(12840);
+        pub const PORTUGUESE: Self = Self(12842);
+        pub const ROMANIAN: Self = Self(12844);
+        pub const RUSSIAN: Self = Self(12846);
+        pub const SPANISH: Self = Self(12848);
+        pub const SWEDISH: Self = Self(12850);
+        pub const TURKISH: Self = Self(12852);
+    }
 
     impl<DB> FromSql<Regconfig, DB> for TsConfiguration
     where
@@ -87,15 +96,10 @@ mod functions {
         #[sql_name = "to_tsquery"]
         fn to_tsquery_with_search_config(config: Regconfig, querytext: Text) -> TsQuery;
     }
-    sql_function!(fn to_tsvector(x: Text) -> TsVector);
-    sql_function!(fn nullableto_tsvector(x: Nullable<Text>) -> TsVector);
+    sql_function!(fn to_tsvector<T: TextOrNullableText>(x: T) -> TsVector);
     sql_function! {
         #[sql_name = "to_tsvector"]
-        fn to_tsvector_with_search_config(config: Regconfig, document_content: Text) -> TsVector;
-    }
-    sql_function! {
-        #[sql_name = "to_tsvector"]
-        fn nullableto_tsvector_with_search_config(config: Regconfig, document_content: Nullable<Text>) -> TsVector;
+        fn to_tsvector_with_search_config<T: TextOrNullableText>(config: Regconfig, document_content: T) -> TsVector;
     }
     sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
