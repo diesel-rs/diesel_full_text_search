@@ -1,6 +1,9 @@
-#[macro_use] extern crate diesel;
+#[macro_use]
+extern crate diesel;
 
 mod types {
+    use diesel::sql_types::*;
+
     #[allow(deprecated)]
     use diesel::SqlType;
 
@@ -13,15 +16,75 @@ mod types {
     pub struct TsVector;
     pub type Tsvector = TsVector;
 
+    pub trait TextOrNullableText {}
+
+    impl TextOrNullableText for Text {}
+    impl TextOrNullableText for Nullable<Text> {}
+
     #[derive(SqlType)]
     #[postgres(type_name = "regconfig")]
     pub struct Regconfig;
 }
 
+pub mod configuration {
+    use crate::Regconfig;
+
+    use std::io::Write;
+
+    use diesel::backend::Backend;
+    use diesel::deserialize::{self, FromSql};
+    use diesel::serialize::{self, Output};
+    use diesel::sql_types::Integer;
+    use diesel::types::ToSql;
+
+    #[derive(Debug, PartialEq, AsExpression)]
+    #[sql_type = "Regconfig"]
+    pub struct TsConfiguration(pub u32);
+
+    impl TsConfiguration {
+        pub const SIMPLE: Self = Self(3748);
+        pub const DANISH: Self = Self(12824);
+        pub const DUTCH: Self = Self(12826);
+        pub const ENGLISH: Self = Self(12828);
+        pub const FINNISH: Self = Self(12830);
+        pub const FRENCH: Self = Self(12832);
+        pub const GERMAN: Self = Self(12834);
+        pub const HUNGARIAN: Self = Self(12836);
+        pub const ITALIAN: Self = Self(12838);
+        pub const NORWEGIAN: Self = Self(12840);
+        pub const PORTUGUESE: Self = Self(12842);
+        pub const ROMANIAN: Self = Self(12844);
+        pub const RUSSIAN: Self = Self(12846);
+        pub const SPANISH: Self = Self(12848);
+        pub const SWEDISH: Self = Self(12850);
+        pub const TURKISH: Self = Self(12852);
+    }
+
+    impl<DB> FromSql<Regconfig, DB> for TsConfiguration
+    where
+        DB: Backend,
+        i32: FromSql<Integer, DB>,
+    {
+        fn from_sql(bytes: Option<&DB::RawValue>) -> deserialize::Result<Self> {
+            <i32 as FromSql<Integer, DB>>::from_sql(bytes).map(|oid| TsConfiguration(oid as u32))
+        }
+    }
+
+    impl<DB> ToSql<Regconfig, DB> for TsConfiguration
+    where
+        DB: Backend,
+        i32: ToSql<Integer, DB>,
+    {
+        fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
+            <i32 as ToSql<Integer, DB>>::to_sql(&(*&self.0 as i32), out)
+        }
+    }
+}
+
 #[allow(deprecated)]
 mod functions {
-    use types::*;
     use diesel::sql_types::*;
+    use types::*;
 
     sql_function!(fn length(x: TsVector) -> Integer);
     sql_function!(fn numnode(x: TsQuery) -> Integer);
@@ -33,10 +96,10 @@ mod functions {
         #[sql_name = "to_tsquery"]
         fn to_tsquery_with_search_config(config: Regconfig, querytext: Text) -> TsQuery;
     }
-    sql_function!(fn to_tsvector(x: Text) -> TsVector);
+    sql_function!(fn to_tsvector<T: TextOrNullableText>(x: T) -> TsVector);
     sql_function! {
         #[sql_name = "to_tsvector"]
-        fn to_tsvector_with_search_config(config: Regconfig, document_content: Text) -> TsVector;
+        fn to_tsvector_with_search_config<T: TextOrNullableText>(config: Regconfig, document_content: T) -> TsVector;
     }
     sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
@@ -50,13 +113,13 @@ mod functions {
 }
 
 mod dsl {
-    use types::*;
-    use diesel::expression::{Expression, AsExpression};
     use diesel::expression::grouped::Grouped;
+    use diesel::expression::{AsExpression, Expression};
+    use types::*;
 
     mod predicates {
-        use types::*;
         use diesel::pg::Pg;
+        use types::*;
 
         diesel_infix_operator!(Matches, " @@ ", backend: Pg);
         diesel_infix_operator!(Concat, " || ", TsVector, backend: Pg);
@@ -70,7 +133,7 @@ mod dsl {
 
     pub type Concat<T, U> = Grouped<predicates::Concat<T, U>>;
 
-    pub trait TsVectorExtensions: Expression<SqlType=TsVector> + Sized {
+    pub trait TsVectorExtensions: Expression<SqlType = TsVector> + Sized {
         fn matches<T: AsExpression<TsQuery>>(self, other: T) -> Matches<Self, T::Expression> {
             Matches::new(self, other.as_expression())
         }
@@ -80,7 +143,7 @@ mod dsl {
         }
     }
 
-    pub trait TsQueryExtensions: Expression<SqlType=TsQuery> + Sized {
+    pub trait TsQueryExtensions: Expression<SqlType = TsQuery> + Sized {
         fn matches<T: AsExpression<TsVector>>(self, other: T) -> Matches<Self, T::Expression> {
             Matches::new(self, other.as_expression())
         }
@@ -97,18 +160,19 @@ mod dsl {
             Contains::new(self, other.as_expression())
         }
 
-        fn contained_by<T: AsExpression<TsQuery>>(self, other: T) -> ContainedBy<Self, T::Expression> {
+        fn contained_by<T: AsExpression<TsQuery>>(
+            self,
+            other: T,
+        ) -> ContainedBy<Self, T::Expression> {
             ContainedBy::new(self, other.as_expression())
         }
     }
 
-    impl<T: Expression<SqlType=TsVector>> TsVectorExtensions for T {
-    }
+    impl<T: Expression<SqlType = TsVector>> TsVectorExtensions for T {}
 
-    impl<T: Expression<SqlType=TsQuery>> TsQueryExtensions for T {
-    }
+    impl<T: Expression<SqlType = TsQuery>> TsQueryExtensions for T {}
 }
 
-pub use self::types::*;
-pub use self::functions::*;
 pub use self::dsl::*;
+pub use self::functions::*;
+pub use self::types::*;
