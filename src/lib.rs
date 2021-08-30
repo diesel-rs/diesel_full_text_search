@@ -16,7 +16,7 @@ mod types {
     pub struct TsVector;
     pub type Tsvector = TsVector;
 
-    pub trait TextOrNullableText {}
+    pub trait TextOrNullableText: SingleValue {}
 
     impl TextOrNullableText for Text {}
     impl TextOrNullableText for Nullable<Text> {}
@@ -31,11 +31,10 @@ pub mod configuration {
 
     use std::io::Write;
 
-    use diesel::backend::Backend;
+    use diesel::backend::{Backend, RawValue};
     use diesel::deserialize::{self, FromSql};
-    use diesel::serialize::{self, Output};
+    use diesel::serialize::{self, Output, ToSql};
     use diesel::sql_types::Integer;
-    use diesel::types::ToSql;
 
     #[derive(Debug, PartialEq, AsExpression)]
     #[sql_type = "Regconfig"]
@@ -65,7 +64,7 @@ pub mod configuration {
         DB: Backend,
         i32: FromSql<Integer, DB>,
     {
-        fn from_sql(bytes: Option<&DB::RawValue>) -> deserialize::Result<Self> {
+        fn from_sql(bytes: RawValue<DB>) -> deserialize::Result<Self> {
             <i32 as FromSql<Integer, DB>>::from_sql(bytes).map(|oid| TsConfiguration(oid as u32))
         }
     }
