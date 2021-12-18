@@ -8,37 +8,35 @@ mod types {
     use diesel::SqlType;
 
     #[derive(Clone, Copy, SqlType)]
-    #[postgres(oid = "3615", array_oid = "3645")]
+    #[diesel(postgres_type(oid = 3615, array_oid = 3645))]
     pub struct TsQuery;
 
     #[derive(Clone, Copy, SqlType)]
-    #[postgres(oid = "3614", array_oid = "3643")]
+    #[diesel(postgres_type(oid = 3614, array_oid = 3643))]
     pub struct TsVector;
     pub type Tsvector = TsVector;
 
-    pub trait TextOrNullableText {}
+    pub trait TextOrNullableText: SingleValue {}
 
     impl TextOrNullableText for Text {}
     impl TextOrNullableText for Nullable<Text> {}
 
     #[derive(SqlType)]
-    #[postgres(type_name = "regconfig")]
+    #[diesel(postgres_type(name = "regconfig"))]
     pub struct Regconfig;
 }
 
 pub mod configuration {
     use crate::Regconfig;
 
-    use std::io::Write;
-
-    use diesel::backend::Backend;
+    use diesel::backend::{Backend, RawValue};
     use diesel::deserialize::{self, FromSql};
-    use diesel::serialize::{self, Output};
+    use diesel::pg::Pg;
+    use diesel::serialize::{self, Output, ToSql};
     use diesel::sql_types::Integer;
-    use diesel::types::ToSql;
 
     #[derive(Debug, PartialEq, AsExpression)]
-    #[sql_type = "Regconfig"]
+    #[diesel(sql_type = Regconfig)]
     pub struct TsConfiguration(pub u32);
 
     impl TsConfiguration {
@@ -65,18 +63,14 @@ pub mod configuration {
         DB: Backend,
         i32: FromSql<Integer, DB>,
     {
-        fn from_sql(bytes: Option<&DB::RawValue>) -> deserialize::Result<Self> {
+        fn from_sql(bytes: RawValue<DB>) -> deserialize::Result<Self> {
             <i32 as FromSql<Integer, DB>>::from_sql(bytes).map(|oid| TsConfiguration(oid as u32))
         }
     }
 
-    impl<DB> ToSql<Regconfig, DB> for TsConfiguration
-    where
-        DB: Backend,
-        i32: ToSql<Integer, DB>,
-    {
-        fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
-            <i32 as ToSql<Integer, DB>>::to_sql(&(*&self.0 as i32), out)
+    impl ToSql<Regconfig, Pg> for TsConfiguration {
+        fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, Pg>) -> serialize::Result {
+            <i32 as ToSql<Integer, Pg>>::to_sql(&(self.0 as i32), &mut out.reborrow())
         }
     }
 }
@@ -121,12 +115,12 @@ mod dsl {
         use diesel::pg::Pg;
         use types::*;
 
-        diesel_infix_operator!(Matches, " @@ ", backend: Pg);
-        diesel_infix_operator!(Concat, " || ", TsVector, backend: Pg);
-        diesel_infix_operator!(And, " && ", TsQuery, backend: Pg);
-        diesel_infix_operator!(Or, " || ", TsQuery, backend: Pg);
-        diesel_infix_operator!(Contains, " @> ", backend: Pg);
-        diesel_infix_operator!(ContainedBy, " <@ ", backend: Pg);
+        infix_operator!(Matches, " @@ ", backend: Pg);
+        infix_operator!(Concat, " || ", TsVector, backend: Pg);
+        infix_operator!(And, " && ", TsQuery, backend: Pg);
+        infix_operator!(Or, " || ", TsQuery, backend: Pg);
+        infix_operator!(Contains, " @> ", backend: Pg);
+        infix_operator!(ContainedBy, " <@ ", backend: Pg);
     }
 
     use self::predicates::*;
