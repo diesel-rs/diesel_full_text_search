@@ -37,7 +37,7 @@ pub mod configuration {
 
     #[derive(Debug, PartialEq, AsExpression)]
     #[diesel(sql_type = RegConfig)]
-    pub struct TsConfiguration(pub i32);
+    pub struct TsConfiguration(pub u32);
 
     impl TsConfiguration {
         pub const SIMPLE: Self = Self(3748);
@@ -61,17 +61,17 @@ pub mod configuration {
     impl<DB> FromSql<RegConfig, DB> for TsConfiguration
     where
         DB: Backend,
-        i32: FromSql<Integer, DB>,
+        u32: FromSql<Integer, DB>,
     {
         fn from_sql(bytes: RawValue<'_, DB>) -> deserialize::Result<Self> {
-            i32::from_sql(bytes).map(|oid| TsConfiguration(oid))
+            u32::from_sql(bytes).map(|oid| TsConfiguration(oid))
         }
     }
 
     impl<DB> ToSql<RegConfig, DB> for TsConfiguration
     where
         DB: Backend,
-        i32: ToSql<Integer, DB>,
+        u32: ToSql<Integer, DB>,
     {
         fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, DB>) -> serialize::Result {
             self.0.to_sql(out)
