@@ -1,6 +1,6 @@
 # diesel_full_text_search
 
-[![Crate](https://meritbadge.herokuapp.com/diesel_full_text_search)](https://crates.io/crates/diesel_full_text_search)
+![crates.io](https://img.shields.io/crates/v/diesel_full_text_search.svg)
 [![docs](https://docs.rs/diesel_full_text_search/badge.svg)](https://docs.rs/diesel_full_text_search)
 
 Add support for [Postgres full text search](https://www.postgresql.org/docs/current/textsearch.html)
