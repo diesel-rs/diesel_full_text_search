@@ -63,7 +63,7 @@ pub mod configuration {
         i32: FromSql<Integer, Pg>,
     {
         fn from_sql(bytes: RawValue<'_, Pg>) -> deserialize::Result<Self> {
-            i32::from_sql(bytes).map(|oid| TsConfiguration(oid as u32))
+            <i32 as FromSql<Integer, Pg>>::from_sql(bytes).map(|oid| TsConfiguration(oid as u32))
         }
     }
 
