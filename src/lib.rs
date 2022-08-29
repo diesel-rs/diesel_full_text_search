@@ -4,9 +4,6 @@ extern crate diesel;
 mod types {
     use diesel::sql_types::*;
 
-    #[allow(deprecated)]
-    use diesel::SqlType;
-
     #[derive(Clone, Copy, SqlType)]
     #[diesel(postgres_type(oid = 3615, array_oid = 3645))]
     pub struct TsQuery;
@@ -35,7 +32,7 @@ pub mod configuration {
     use diesel::serialize::{self, Output, ToSql};
     use diesel::sql_types::Integer;
 
-    #[derive(Debug, PartialEq, AsExpression)]
+    #[derive(Debug, PartialEq, diesel::expression::AsExpression)]
     #[diesel(sql_type = RegConfig)]
     pub struct TsConfiguration(pub u32);
 

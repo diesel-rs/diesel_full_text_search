@@ -1,10 +1,9 @@
 [package]
 name = "diesel_full_text_search"
 version = "2.0.0"
-authors = ["Sean Griffin <sean@seantheprogrammer.com>"]
 description = "Adds support for PostgreSQL full text search to Diesel"
 license = "MIT"
 repository = "https://github.com/diesel-rs/diesel_full_text_search"
 
 [dependencies]
-diesel = { version = "2.0.0-rc.0", features = ["postgres"] }
+diesel = { version = "2.0.0", features = ["postgres"], default-features = false }
