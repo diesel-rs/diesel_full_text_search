@@ -95,6 +95,10 @@ mod functions {
         fn to_tsvector_with_search_config<T: TextOrNullableText + SingleValue>(config: RegConfig, document_content: T) -> TsVector;
     }
     sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
+    sql_function! {
+        #[sql_name = "ts_headline"]
+        fn ts_headline_with_search_config(config: RegConfig, x: Text, y: TsQuery) -> Text;
+    }       
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
     sql_function!(fn ts_rank_cd(x: TsVector, y: TsQuery) -> Float);
     sql_function! {
