@@ -103,6 +103,10 @@ mod functions {
     }
     sql_function!(fn phraseto_tsquery(x: Text) -> TsQuery);
     sql_function!(fn websearch_to_tsquery(x: Text) -> TsQuery);
+    sql_function! {
+        #[sql_name = "websearch_to_tsquery"]
+        fn websearch_to_tsquery_with_search_config(config: RegConfig, x: Text) -> TsQuery;
+    }
 }
 
 mod dsl {
