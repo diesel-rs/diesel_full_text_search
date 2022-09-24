@@ -105,6 +105,14 @@ mod functions {
         #[sql_name = "ts_rank_cd"]
         fn ts_rank_cd_weighted(w: Array<Float>, x: TsVector, y: TsQuery) -> Float;
     }
+    sql_function! {
+        #[sql_name = "ts_rank_cd"]
+        fn ts_rank_cd_normalized(x: TsVector, y: TsQuery, n: Integer) -> Float;
+    }
+    sql_function! {
+        #[sql_name = "ts_rank_cd"]
+        fn ts_rank_cd_weighted_normalized(w: Array<Float>, x: TsVector, y: TsQuery, n: Integer) -> Float;
+    }
     sql_function!(fn phraseto_tsquery(x: Text) -> TsQuery);
     sql_function!(fn websearch_to_tsquery(x: Text) -> TsQuery);
     sql_function! {
