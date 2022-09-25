@@ -95,14 +95,30 @@ mod functions {
         fn to_tsvector_with_search_config<T: TextOrNullableText + SingleValue>(config: RegConfig, document_content: T) -> TsVector;
     }
     sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
+    sql_function! {
+        #[sql_name = "ts_headline"]
+        fn ts_headline_with_search_config(config: RegConfig, x: Text, y: TsQuery) -> Text;
+    }       
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
     sql_function!(fn ts_rank_cd(x: TsVector, y: TsQuery) -> Float);
     sql_function! {
         #[sql_name = "ts_rank_cd"]
         fn ts_rank_cd_weighted(w: Array<Float>, x: TsVector, y: TsQuery) -> Float;
     }
+    sql_function! {
+        #[sql_name = "ts_rank_cd"]
+        fn ts_rank_cd_normalized(x: TsVector, y: TsQuery, n: Integer) -> Float;
+    }
+    sql_function! {
+        #[sql_name = "ts_rank_cd"]
+        fn ts_rank_cd_weighted_normalized(w: Array<Float>, x: TsVector, y: TsQuery, n: Integer) -> Float;
+    }
     sql_function!(fn phraseto_tsquery(x: Text) -> TsQuery);
     sql_function!(fn websearch_to_tsquery(x: Text) -> TsQuery);
+    sql_function! {
+        #[sql_name = "websearch_to_tsquery"]
+        fn websearch_to_tsquery_with_search_config(config: RegConfig, x: Text) -> TsQuery;
+    }
 }
 
 mod dsl {
