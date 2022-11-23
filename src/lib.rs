@@ -119,6 +119,7 @@ mod functions {
         #[sql_name = "websearch_to_tsquery"]
         fn websearch_to_tsquery_with_search_config(config: RegConfig, x: Text) -> TsQuery;
     }
+    sql_function!(fn setweight(x: TsVector, w: CChar) -> TsVector);
 }
 
 mod dsl {
