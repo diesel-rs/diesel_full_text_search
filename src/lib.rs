@@ -26,13 +26,16 @@ mod types {
 pub mod configuration {
     use crate::RegConfig;
 
-    use diesel::backend::RawValue;
+    use diesel::backend::{Backend, RawValue};
     use diesel::deserialize::{self, FromSql};
+    use diesel::expression::{is_aggregate, ValidGrouping};
     use diesel::pg::Pg;
+    use diesel::query_builder::{AstPass, QueryFragment, QueryId};
     use diesel::serialize::{self, Output, ToSql};
     use diesel::sql_types::Integer;
+    use diesel::{AppearsOnTable, Expression, QueryResult, SelectableExpression};
 
-    #[derive(Debug, PartialEq, diesel::expression::AsExpression)]
+    #[derive(Debug, PartialEq, Eq, diesel::expression::AsExpression)]
     #[diesel(sql_type = RegConfig)]
     pub struct TsConfiguration(pub u32);
 
@@ -69,8 +72,39 @@ pub mod configuration {
         i32: ToSql<Integer, Pg>,
     {
         fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, Pg>) -> serialize::Result {
-            <i32 as ToSql<Integer, Pg>>::to_sql(&(*&self.0 as i32), &mut out.reborrow())
+            <i32 as ToSql<Integer, Pg>>::to_sql(&(self.0 as i32), &mut out.reborrow())
         }
+    }
+
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    pub struct TsConfigurationByName(pub &'static str);
+
+    impl<DB> QueryFragment<DB> for TsConfigurationByName
+    where
+        DB: Backend,
+    {
+        fn walk_ast<'b>(&'b self, mut out: AstPass<'_, 'b, DB>) -> QueryResult<()> {
+            out.push_sql(&format!("'{}'", &self.0));
+            Ok(())
+        }
+    }
+
+    impl<GB> ValidGrouping<GB> for TsConfigurationByName {
+        type IsAggregate = is_aggregate::Never;
+    }
+
+    impl QueryId for TsConfigurationByName {
+        const HAS_STATIC_QUERY_ID: bool = false;
+
+        type QueryId = ();
+    }
+
+    impl<QS> SelectableExpression<QS> for TsConfigurationByName where Self: Expression {}
+
+    impl<QS> AppearsOnTable<QS> for TsConfigurationByName where Self: Expression {}
+
+    impl Expression for TsConfigurationByName {
+        type SqlType = RegConfig;
     }
 }
 
@@ -98,7 +132,7 @@ mod functions {
     sql_function! {
         #[sql_name = "ts_headline"]
         fn ts_headline_with_search_config(config: RegConfig, x: Text, y: TsQuery) -> Text;
-    }       
+    }
     sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
     sql_function!(fn ts_rank_cd(x: TsVector, y: TsQuery) -> Float);
     sql_function! {
