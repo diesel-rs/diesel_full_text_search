@@ -26,10 +26,10 @@ mod types {
 pub mod configuration {
     use crate::RegConfig;
 
-    use diesel::backend::{Backend, RawValue};
+    use diesel::backend::Backend;
     use diesel::deserialize::{self, FromSql};
     use diesel::expression::{is_aggregate, ValidGrouping};
-    use diesel::pg::Pg;
+    use diesel::pg::{Pg, PgValue};
     use diesel::query_builder::{AstPass, QueryFragment, QueryId};
     use diesel::serialize::{self, Output, ToSql};
     use diesel::sql_types::Integer;
@@ -62,7 +62,7 @@ pub mod configuration {
     where
         i32: FromSql<Integer, Pg>,
     {
-        fn from_sql(bytes: RawValue<'_, Pg>) -> deserialize::Result<Self> {
+        fn from_sql(bytes: PgValue) -> deserialize::Result<Self> {
             <i32 as FromSql<Integer, Pg>>::from_sql(bytes).map(|oid| TsConfiguration(oid as u32))
         }
     }
