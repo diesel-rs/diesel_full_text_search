@@ -40,7 +40,6 @@ jobs:
           profile: minimal
           override: true
 
+      - uses: taiki-e/install-action@cargo-hack
       - name: Build crate
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
+        run: cargo hack --feature-powerset build
