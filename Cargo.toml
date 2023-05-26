@@ -6,4 +6,8 @@ license = "MIT"
 repository = "https://github.com/diesel-rs/diesel_full_text_search"
 
 [dependencies]
-diesel = { version = "2.0.0", features = ["postgres"], default-features = false }
+diesel = { version = "2.0.0", features = ["postgres_backend"], default-features = false }
+
+[features]
+default = ["with-diesel-postgres"]
+with-diesel-postgres = ["diesel/postgres"]
