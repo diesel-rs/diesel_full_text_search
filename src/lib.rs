@@ -27,7 +27,7 @@ pub mod configuration {
     use crate::RegConfig;
 
     use diesel::backend::Backend;
-    use diesel::deserialize::{self, FromSql};
+    use diesel::deserialize::{self, FromSql, FromSqlRow};
     use diesel::expression::{is_aggregate, ValidGrouping};
     use diesel::pg::{Pg, PgValue};
     use diesel::query_builder::{AstPass, QueryFragment, QueryId};
@@ -35,7 +35,7 @@ pub mod configuration {
     use diesel::sql_types::Integer;
     use diesel::{AppearsOnTable, Expression, QueryResult, SelectableExpression};
 
-    #[derive(Debug, PartialEq, Eq, diesel::expression::AsExpression)]
+    #[derive(Debug, PartialEq, Eq, diesel::expression::AsExpression, FromSqlRow)]
     #[diesel(sql_type = RegConfig)]
     pub struct TsConfiguration(pub u32);
 
