@@ -18,7 +18,7 @@ use diesel_full_text_search::*;
 
 let search = "bar";
 
-let query = Foo::table.filter(to_tsvector(Foo::description).matches(to_tsquery(search)));
+let query = foo::table.filter(to_tsvector(Foo::description).matches(to_tsquery(search)));
 ```
 
 For complete examples, see [/examples](./examples).
