@@ -8,3 +8,17 @@ to [diesel](https://diesel.rs/), the safe, extensible ORM and query builder for 
 
 This crate also serves as an example of how to extend diesel with database specific features
 outside of diesel itself as third party crate.
+
+
+## Example Usage
+
+```rust
+
+use diesel_full_text_search::*;
+
+let search = "bar";
+
+let query = foo::table.filter(to_tsvector(Foo::description).matches(to_tsquery(search)));
+```
+
+For complete examples, see [/examples](./examples).
