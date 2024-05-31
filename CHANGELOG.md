@@ -6,6 +6,10 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
+### [2.2.0] - 2024-05-31
+
+* Update diesel version to 2.2.0
+
 ### [2.1.1] - 2023-10-19
 
 * Add a missing `#[derive(FromSqlRow)]` for the `RegConfig` type to allow loading it from the database
@@ -30,3 +34,4 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 [2.0.0]: https://github.com/diesel-rs/diesel_full_text_search/compare/v1.0.1...v2.0.0
 [2.1.0]: https://github.com/diesel-rs/diesel_full_text_search/compare/v2.0.0...v2.1.0
 [2.1.1]: https://github.com/diesel-rs/diesel_full_text_search/compare/v2.1.0...v2.1.1
+[2.2.0]: https://github.com/diesel-rs/diesel_full_text_search/compare/v2.1.1...v2.2.0
