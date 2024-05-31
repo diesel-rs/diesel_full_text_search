@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate diesel;
-
 mod types {
     use diesel::sql_types::*;
 
@@ -110,63 +107,64 @@ pub mod configuration {
 
 #[allow(deprecated)]
 mod functions {
+    use crate::types::*;
+    use diesel::define_sql_function;
     use diesel::sql_types::*;
-    use types::*;
 
-    sql_function!(fn length(x: TsVector) -> Integer);
-    sql_function!(fn numnode(x: TsQuery) -> Integer);
-    sql_function!(fn plainto_tsquery(x: Text) -> TsQuery);
-    sql_function! {
+    define_sql_function!(fn length(x: TsVector) -> Integer);
+    define_sql_function!(fn numnode(x: TsQuery) -> Integer);
+    define_sql_function!(fn plainto_tsquery(x: Text) -> TsQuery);
+    define_sql_function! {
         #[sql_name = "plainto_tsquery"]
         fn plainto_tsquery_with_search_config(config: RegConfig, querytext: Text) -> TsQuery;
     }
-    sql_function!(fn querytree(x: TsQuery) -> Text);
-    sql_function!(fn strip(x: TsVector) -> TsVector);
-    sql_function!(fn to_tsquery(x: Text) -> TsQuery);
-    sql_function! {
+    define_sql_function!(fn querytree(x: TsQuery) -> Text);
+    define_sql_function!(fn strip(x: TsVector) -> TsVector);
+    define_sql_function!(fn to_tsquery(x: Text) -> TsQuery);
+    define_sql_function! {
         #[sql_name = "to_tsquery"]
         fn to_tsquery_with_search_config(config: RegConfig, querytext: Text) -> TsQuery;
     }
-    sql_function!(fn to_tsvector<T: TextOrNullableText + SingleValue>(x: T) -> TsVector);
-    sql_function! {
+    define_sql_function!(fn to_tsvector<T: TextOrNullableText + SingleValue>(x: T) -> TsVector);
+    define_sql_function! {
         #[sql_name = "to_tsvector"]
         fn to_tsvector_with_search_config<T: TextOrNullableText + SingleValue>(config: RegConfig, document_content: T) -> TsVector;
     }
-    sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
-    sql_function! {
+    define_sql_function!(fn ts_headline(x: Text, y: TsQuery) -> Text);
+    define_sql_function! {
         #[sql_name = "ts_headline"]
         fn ts_headline_with_search_config(config: RegConfig, x: Text, y: TsQuery) -> Text;
     }
-    sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
-    sql_function!(fn ts_rank_cd(x: TsVector, y: TsQuery) -> Float);
-    sql_function! {
+    define_sql_function!(fn ts_rank(x: TsVector, y: TsQuery) -> Float);
+    define_sql_function!(fn ts_rank_cd(x: TsVector, y: TsQuery) -> Float);
+    define_sql_function! {
         #[sql_name = "ts_rank_cd"]
         fn ts_rank_cd_weighted(w: Array<Float>, x: TsVector, y: TsQuery) -> Float;
     }
-    sql_function! {
+    define_sql_function! {
         #[sql_name = "ts_rank_cd"]
         fn ts_rank_cd_normalized(x: TsVector, y: TsQuery, n: Integer) -> Float;
     }
-    sql_function! {
+    define_sql_function! {
         #[sql_name = "ts_rank_cd"]
         fn ts_rank_cd_weighted_normalized(w: Array<Float>, x: TsVector, y: TsQuery, n: Integer) -> Float;
     }
-    sql_function!(fn phraseto_tsquery(x: Text) -> TsQuery);
-    sql_function!(fn websearch_to_tsquery(x: Text) -> TsQuery);
-    sql_function! {
+    define_sql_function!(fn phraseto_tsquery(x: Text) -> TsQuery);
+    define_sql_function!(fn websearch_to_tsquery(x: Text) -> TsQuery);
+    define_sql_function! {
         #[sql_name = "websearch_to_tsquery"]
         fn websearch_to_tsquery_with_search_config(config: RegConfig, x: Text) -> TsQuery;
     }
-    sql_function!(fn setweight(x: TsVector, w: CChar) -> TsVector);
+    define_sql_function!(fn setweight(x: TsVector, w: CChar) -> TsVector);
 }
 
 mod dsl {
+    use crate::types::*;
     use diesel::expression::{AsExpression, Expression};
-    use types::*;
 
     mod predicates {
+        use crate::types::*;
         use diesel::pg::Pg;
-        use types::*;
 
         diesel::infix_operator!(Matches, " @@ ", backend: Pg);
         diesel::infix_operator!(Concat, " || ", TsVector, backend: Pg);
