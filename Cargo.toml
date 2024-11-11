@@ -7,6 +7,7 @@ repository = "https://github.com/diesel-rs/diesel_full_text_search"
 edition = "2021"
 
 [dependencies]
+byteorder = "1.5.0"
 diesel = { version = "~2.2.0", features = ["postgres_backend"], default-features = false }
 
 [features]
