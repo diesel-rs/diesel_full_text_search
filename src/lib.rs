@@ -43,7 +43,7 @@ mod types {
             // Number of lexemes (uint32)
             let num_lexemes = cursor.read_u32::<NetworkEndian>()?;
 
-            let mut entries = Vec::with_capacity(num_lexemes as usize);
+            let mut entries = Vec::with_capacity(std::cmp::min(num_lexemes as usize, 1000));
 
             for _ in 0..num_lexemes {
                 let mut lexeme = Vec::new();
