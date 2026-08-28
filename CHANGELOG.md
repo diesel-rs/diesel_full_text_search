@@ -6,6 +6,14 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
+### [2.3.1] - 2026-09-22
+
+* Fix an issue that could lead to an unbound allocation while deserializing `PgTsVector` values
+
+### [2.3.0] - 2025-10-08
+
+* Update diesel version to 2.3.0
+
 ### [2.2.0] - 2024-05-31
 
 * Update diesel version to 2.2.0
@@ -20,7 +28,7 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ### [2.0.0]
 
-* Diesel 2.0 compatiblity
+* Diesel 2.0 compatibility
 
 ### [1.0.1] - 2018-04-11
 
@@ -35,3 +43,5 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 [2.1.0]: https://github.com/diesel-rs/diesel_full_text_search/compare/v2.0.0...v2.1.0
 [2.1.1]: https://github.com/diesel-rs/diesel_full_text_search/compare/v2.1.0...v2.1.1
 [2.2.0]: https://github.com/diesel-rs/diesel_full_text_search/compare/v2.1.1...v2.2.0
+[2.3.0]: https://github.com/diesel-rs/diesel_full_text_search/compare/v2.2.0...v2.3.0
+[2.3.1]: https://github.com/diesel-rs/diesel_full_text_search/compare/v2.3.0...v2.3.1

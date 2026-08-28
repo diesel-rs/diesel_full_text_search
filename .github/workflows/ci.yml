@@ -7,6 +7,23 @@ on:
     branches:
       - main
 
+permissions:
+  contents: "read"
+
+env:
+  CARGO_NET_RETRY: 10
+  RUSTUP_MAX_RETRIES: 10
+  # Force HTTP/1.1 for crates.io downloads: HTTP/2 multiplexing against the
+  # CDN intermittently drops connections mid-stream (SSL "unexpected eof"),
+  # and cargo does not retry those, so CARGO_NET_RETRY alone cannot recover.
+  CARGO_HTTP_MULTIPLEXING: "false"
+
+# See: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency.
+# This will ensure that only one commit will be running tests at a time on each PR.
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     strategy:
@@ -31,14 +48,34 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Install ${{ matrix.version }}
-        uses: dtolnay/rust-toolchain@master
+      - name: Checkout sources
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          toolchain: ${{ matrix.version }}
-          profile: minimal
+          persist-credentials: false
 
-      - uses: taiki-e/install-action@cargo-hack
+      - name: Set environment variables
+        shell: bash
+        if: matrix.version != 'nightly'
+        run: |
+          echo "RUSTFLAGS=-D warnings" >> $GITHUB_ENV
+          echo "RUSTDOCFLAGS=-D warnings" >> $GITHUB_ENV
+
+      - name: Rust version check
+        shell: bash
+        env:
+          RUST: ${{ matrix.version }}
+        run: |
+          rustup override set $RUST
+          rustup component add rustfmt
+          cargo --version
+          rustc --version
+
+      - uses: taiki-e/install-action@60581cd7025e0e855cebd745379013e286d9c787 # v2.64.2
+        with:
+          tool: cargo-hack
+
+      - name: Verify code is formatted
+        run: cargo fmt --check
+
       - name: Build crate
         run: cargo hack --feature-powerset check --all-targets
