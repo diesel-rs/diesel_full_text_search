@@ -24,47 +24,55 @@ mod types {
 
     impl FromSql<TsVector, Pg> for PgTsVector {
         fn from_sql(
-            bytes: <Pg as diesel::backend::Backend>::RawValue<'_>,
+            value: <Pg as diesel::backend::Backend>::RawValue<'_>,
         ) -> diesel::deserialize::Result<Self> {
-            let mut cursor = Cursor::new(bytes.as_bytes());
+            let bytes = value.as_bytes();
+            decode_tsvector(bytes)
+        }
+    }
 
-            // From Postgres `tsvector.c`:
-            //
-            //     The binary format is as follows:
-            //
-            //     uint32   number of lexemes
-            //
-            //     for each lexeme:
-            //          lexeme text in client encoding, null-terminated
-            //          uint16  number of positions
-            //          for each position:
-            //              uint16 WordEntryPos
+    pub(super) fn decode_tsvector(bytes: &[u8]) -> diesel::deserialize::Result<PgTsVector> {
+        let mut cursor = Cursor::new(bytes);
 
-            // Number of lexemes (uint32)
-            let num_lexemes = cursor.read_u32::<NetworkEndian>()?;
+        // From Postgres `tsvector.c`:
+        //
+        //     The binary format is as follows:
+        //
+        //     uint32   number of lexemes
+        //
+        //     for each lexeme:
+        //          lexeme text in client encoding, null-terminated
+        //          uint16  number of positions
+        //          for each position:
+        //              uint16 WordEntryPos
 
-            let mut entries = Vec::with_capacity(num_lexemes as usize);
+        // Number of lexemes (uint32)
+        let num_lexemes = cursor.read_u32::<NetworkEndian>()?;
 
-            for _ in 0..num_lexemes {
-                let mut lexeme = Vec::new();
-                cursor.read_until(0, &mut lexeme)?;
-                // Remove null terminator
-                lexeme.pop();
-                let lexeme = String::from_utf8(lexeme)?;
+        // a lexeme is at least 3 bytes, so we can use the size of the raw value as upper bound
+        // for the preallocation here to prevent preallocating otherwise deserialized values from
+        // an untrusted source
+        let mut entries = Vec::with_capacity((num_lexemes as usize).min(bytes.len() / 3));
 
-                // Number of positions (uint16)
-                let num_positions = cursor.read_u16::<NetworkEndian>()?;
+        for _ in 0..num_lexemes {
+            let mut lexeme = Vec::new();
+            cursor.read_until(0, &mut lexeme)?;
+            // Remove null terminator
+            lexeme.pop();
+            let lexeme = String::from_utf8(lexeme)?;
 
-                let mut positions = Vec::with_capacity(num_positions as usize);
-                for _ in 0..num_positions {
-                    positions.push(cursor.read_u16::<NetworkEndian>()?);
-                }
+            // Number of positions (uint16)
+            let num_positions = cursor.read_u16::<NetworkEndian>()?;
 
-                entries.push(PgTsVectorEntry { lexeme, positions });
+            let mut positions = Vec::with_capacity(num_positions as usize);
+            for _ in 0..num_positions {
+                positions.push(cursor.read_u16::<NetworkEndian>()?);
             }
 
-            Ok(PgTsVector { entries })
+            entries.push(PgTsVectorEntry { lexeme, positions });
         }
+
+        Ok(PgTsVector { entries })
     }
 
     impl Queryable<TsVector, Pg> for PgTsVector {
@@ -391,5 +399,17 @@ mod tests {
         };
 
         assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn deserialize_malformed_tsvector_doesnt_allocate_unbounded_memory() {
+        // Malicious tsvector wire buffer: just a 4-byte big-endian lexeme count of
+        // 0xFFFFFFFF (u32::MAX). No lexeme content follows. The parser uses this
+        // count verbatim in Vec::with_capacity(num_lexemes) BEFORE reading any
+        // content, sizing an allocation of u32::MAX * size_of::<PgTsVectorEntry>()
+        // (~206 GB) from a 4-byte input.
+        let malicious: [u8; 4] = [0xFF, 0xFF, 0xFF, 0xFF];
+        let err = super::types::decode_tsvector(&malicious);
+        assert!(err.is_err());
     }
 }
